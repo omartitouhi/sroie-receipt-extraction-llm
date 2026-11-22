@@ -1,0 +1,62 @@
+{
+  "zero_shot_vs_few_shot": {
+    "bootstrap": {
+      "diff": 0.025,
+      "ci_low": -0.025,
+      "ci_high": 0.0875,
+      "p_le_0": 0.2495
+    },
+    "mcnemar": {
+      "company": {
+        "a_only": 0,
+        "b_only": 2,
+        "p_value": 0.5
+      },
+      "date": {
+        "a_only": 0,
+        "b_only": 0,
+        "p_value": 1.0
+      },
+      "address": {
+        "a_only": 3,
+        "b_only": 3,
+        "p_value": 1.0
+      },
+      "total": {
+        "a_only": 0,
+        "b_only": 0,
+        "p_value": 1.0
+      }
+    }
+  },
+  "few_shot_vs_rag": {
+    "bootstrap": {
+      "diff": 0.0375,
+      "ci_low": -0.0375,
+      "ci_high": 0.1125,
+      "p_le_0": 0.205
+    },
+    "mcnemar": {
+      "company": {
+        "a_only": 1,
+        "b_only": 0,
+        "p_value": 1.0
+      },
+      "date": {
+        "a_only": 0,
+        "b_only": 0,
+        "p_value": 1.0
+      },
+      "address": {
+        "a_only": 1,
+        "b_only": 5,
+        "p_value": 0.21875
+      },
+      "total": {
+        "a_only": 1,
+        "b_only": 1,
+        "p_value": 1.0
+      }
+    }
+  }
+}

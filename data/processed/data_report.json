@@ -1,0 +1,60 @@
+{
+  "sizes": {
+    "train": 551,
+    "val": 75,
+    "test": 345
+  },
+  "avg_chars": {
+    "train": 698,
+    "val": 671,
+    "test": 688
+  },
+  "gold_in_text_rate_test": {
+    "company": 0.983,
+    "date": 0.988,
+    "address": 0.983,
+    "total": 1.0
+  },
+  "leakage": {
+    "test_exact_duplicates_in_train": 2,
+    "test_near_duplicates_in_train(jaccard>=0.8)": 33,
+    "test_vendor_seen_in_train": 225,
+    "test_vendor_unseen": 120,
+    "near_duplicate_ids": [
+      "test_020",
+      "test_021",
+      "test_025",
+      "test_057",
+      "test_081",
+      "test_082",
+      "test_083",
+      "test_085",
+      "test_098",
+      "test_148",
+      "test_149",
+      "test_151",
+      "test_166",
+      "test_179",
+      "test_180",
+      "test_181",
+      "test_215",
+      "test_224",
+      "test_268",
+      "test_271",
+      "test_280",
+      "test_281",
+      "test_283",
+      "test_284",
+      "test_301",
+      "test_313",
+      "test_328",
+      "test_332",
+      "test_338",
+      "test_341",
+      "test_343",
+      "test_345",
+      "test_346"
+    ],
+    "test_removed_exact_duplicates": 2
+  }
+}

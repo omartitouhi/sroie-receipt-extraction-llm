@@ -1,0 +1,28 @@
+# Environnements Python
+.venv/
+venv/
+env/
+__pycache__/
+*.pyc
+
+# Données (SROIE : à télécharger, ne pas republier)
+data/raw/
+dataset_sroie/
+
+# Modèles / checkpoints (publier l'adaptateur final sur Hugging Face Hub)
+outputs/
+*.safetensors
+*.pt
+*.bin
+
+# Outils / caches
+.ipynb_checkpoints/
+.pytest_cache/
+.idea/
+
+# Archives
+*.zip
+
+# Secrets
+.env
+*.env

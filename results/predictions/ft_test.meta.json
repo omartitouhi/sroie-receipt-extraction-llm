@@ -1,0 +1,19 @@
+{
+  "condition": "ft",
+  "split": "test",
+  "model": "Qwen/Qwen2.5-1.5B-Instruct",
+  "adapter": "C:\\Users\\omart\\OneDrive\\Desktop\\Projet Machine Learning\\outputs\\qlora-sroie\\final",
+  "n": 345,
+  "seconds": 454.6,
+  "sec_per_doc": 1.318,
+  "avg_prompt_tokens": 610.3,
+  "load_in_4bit": true,
+  "perturb": null,
+  "gpu": {
+    "tag": "ft",
+    "device": "NVIDIA GeForce RTX 5060 Laptop GPU",
+    "max_allocated_gb": 3.36,
+    "max_reserved_gb": 3.86,
+    "total_gb": 8.52
+  }
+}

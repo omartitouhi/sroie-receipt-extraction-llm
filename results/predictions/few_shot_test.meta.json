@@ -1,0 +1,19 @@
+{
+  "condition": "few_shot",
+  "split": "test",
+  "model": "Qwen/Qwen2.5-1.5B-Instruct",
+  "adapter": null,
+  "n": 345,
+  "seconds": 630.2,
+  "sec_per_doc": 1.827,
+  "avg_prompt_tokens": 1535.3,
+  "load_in_4bit": true,
+  "perturb": null,
+  "gpu": {
+    "tag": "few_shot",
+    "device": "NVIDIA GeForce RTX 5060 Laptop GPU",
+    "max_allocated_gb": 2.25,
+    "max_reserved_gb": 4.5,
+    "total_gb": 8.52
+  }
+}

@@ -1,0 +1,17 @@
+# PyTorch : sur Colab il est déjà installé.
+# En local avec une RTX 50xx (Blackwell), installer d'abord :
+#   pip install torch --index-url https://download.pytorch.org/whl/cu128
+torch>=2.7
+transformers>=4.56
+peft>=0.17
+accelerate>=1.10
+bitsandbytes>=0.46
+datasets>=3.0
+huggingface_hub>=0.34
+sentence-transformers>=5.0
+pyarrow
+numpy
+matplotlib
+pytest
+
+ipython

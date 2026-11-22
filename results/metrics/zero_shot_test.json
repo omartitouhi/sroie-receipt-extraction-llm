@@ -1,0 +1,46 @@
+{
+  "n_docs": 20,
+  "json_valid_rate": 1.0,
+  "doc_all_correct": 0.25,
+  "company_em": 0.7,
+  "company_f1": 0.8335714285714285,
+  "date_em": 1.0,
+  "date_f1": 0.9675,
+  "address_em": 0.5,
+  "address_f1": 0.9105696387609198,
+  "total_em": 0.9,
+  "total_f1": 0.95,
+  "mean_em": 0.775,
+  "mean_f1": 0.915410266833087,
+  "unsupported_rate": 0.0,
+  "categories": {
+    "correct": 62,
+    "json_invalide": 0,
+    "omission": 0,
+    "mauvais_span": 4,
+    "partiel": 14,
+    "fabrication": 0,
+    "memorisation": 0
+  },
+  "mean_em_seen_vendor": 0.8,
+  "n_docs_seen_vendor": 10,
+  "mean_em_unseen_vendor": 0.75,
+  "n_docs_unseen_vendor": 10,
+  "meta": {
+    "condition": "zero_shot",
+    "split": "test",
+    "model": "Qwen/Qwen2.5-1.5B-Instruct",
+    "adapter": null,
+    "n": 20,
+    "seconds": 30.6,
+    "sec_per_doc": 1.529,
+    "avg_prompt_tokens": 625.4,
+    "load_in_4bit": true,
+    "gpu": {
+      "tag": "zero_shot",
+      "max_allocated_gb": 2.55,
+      "max_reserved_gb": 2.66,
+      "total_gb": 8.52
+    }
+  }
+}

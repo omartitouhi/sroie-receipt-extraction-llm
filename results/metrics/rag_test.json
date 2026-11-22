@@ -1,0 +1,47 @@
+{
+  "n_docs": 20,
+  "json_valid_rate": 1.0,
+  "doc_all_correct": 0.55,
+  "company_em": 0.75,
+  "company_f1": 0.8666666666666666,
+  "date_em": 1.0,
+  "date_f1": 0.9666666666666666,
+  "address_em": 0.7,
+  "address_f1": 0.7666666666666667,
+  "total_em": 0.9,
+  "total_f1": 0.9,
+  "mean_em": 0.8375,
+  "mean_f1": 0.875,
+  "unsupported_rate": 0.013157894736842105,
+  "categories": {
+    "correct": 67,
+    "json_invalide": 0,
+    "omission": 4,
+    "mauvais_span": 4,
+    "partiel": 5,
+    "fabrication": 0,
+    "memorisation": 0
+  },
+  "mean_em_seen_vendor": 0.875,
+  "n_docs_seen_vendor": 10,
+  "mean_em_unseen_vendor": 0.8,
+  "n_docs_unseen_vendor": 10,
+  "meta": {
+    "condition": "rag",
+    "split": "test",
+    "model": "Qwen/Qwen2.5-1.5B-Instruct",
+    "adapter": null,
+    "n": 20,
+    "seconds": 37.4,
+    "sec_per_doc": 1.868,
+    "avg_prompt_tokens": 1666.9,
+    "load_in_4bit": true,
+    "retrieval_vendor_hit_rate@1": 1.0,
+    "gpu": {
+      "tag": "rag",
+      "max_allocated_gb": 4.96,
+      "max_reserved_gb": 5.27,
+      "total_gb": 8.52
+    }
+  }
+}
