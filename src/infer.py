@@ -18,10 +18,11 @@ import argparse
 import json
 import random
 import time
+from pathlib import Path
 
 import torch
 
-from .config import BASE_MODEL, MAX_NEW_TOKENS, PRED_DIR, PROC_DIR, SEED, ensure_dirs, ADAPTER_DIR
+from .config import BASE_MODEL, MAX_NEW_TOKENS, PRED_DIR, PROC_DIR, ROOT, SEED, ensure_dirs, ADAPTER_DIR
 from .data import load_jsonl
 from .metrics import norm_text
 from .modeling import gpu_mem_report, load_model, load_tokenizer
@@ -110,6 +111,17 @@ def generate(model, tok, prompts, batch_size=16, max_new_tokens=MAX_NEW_TOKENS):
     return outputs
 
 
+def _relative_to_root(path):
+    """Chemin relatif à la racine du projet si possible (pas de chemin perso dans les résultats)."""
+    if path is None:
+        return None
+    p = Path(path).resolve()
+    try:
+        return p.relative_to(ROOT).as_posix()
+    except ValueError:
+        return str(path)
+
+
 def run(condition, split="test", model_name=BASE_MODEL, adapter=None, k=2, limit=None,
         batch_size=16, load_in_4bit=True, tag=None, force=False, perturb=None):
     ensure_dirs()
@@ -168,7 +180,8 @@ def run(condition, split="test", model_name=BASE_MODEL, adapter=None, k=2, limit
                 "demo_ids": [x["id"] for x in d], "prompt_tokens": n, "raw_output": o,
                 "perturb": perturb,
             }, ensure_ascii=False) + "\n")
-    meta = {"condition": condition, "split": split, "model": model_name, "adapter": adapter,
+    meta = {"condition": condition, "split": split, "model": model_name,
+            "adapter": _relative_to_root(adapter) if condition.startswith("ft") else None,
             "n": len(data), "seconds": round(elapsed, 1),
             "sec_per_doc": round(elapsed / len(data), 3),
             "avg_prompt_tokens": round(sum(n_tok) / len(n_tok), 1),

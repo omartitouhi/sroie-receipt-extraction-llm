@@ -2,7 +2,7 @@
   "condition": "ft",
   "split": "test",
   "model": "Qwen/Qwen2.5-1.5B-Instruct",
-  "adapter": "C:\\Users\\omart\\OneDrive\\Desktop\\Projet Machine Learning\\outputs\\qlora-sroie\\final",
+  "adapter": "outputs/qlora-sroie/final",
   "n": 345,
   "seconds": 454.6,
   "sec_per_doc": 1.318,
