@@ -138,7 +138,10 @@ def run(condition, split="test", model_name=BASE_MODEL, adapter=None, k=2, limit
     # Reprise après coupure Colab : on ne recalcule pas une condition déjà complète
     name = (tag or condition) + (f"__{perturb}" if perturb else "")
     path = PRED_DIR / f"{name}_{split}.jsonl"
-    if not force and path.exists() and len(load_jsonl(path)) == len(data):
+    meta_path = PRED_DIR / f"{name}_{split}.meta.json"
+    same_model = (not meta_path.exists()
+                  or json.loads(meta_path.read_text(encoding="utf-8")).get("model") == model_name)
+    if not force and same_model and path.exists() and len(load_jsonl(path)) == len(data):
         print(f"[{name}/{split}] déjà calculé ({len(data)} tickets) -> on passe (--force pour refaire)")
         return path
 

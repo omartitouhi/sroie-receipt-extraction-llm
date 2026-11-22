@@ -123,6 +123,9 @@ def main():
     a = ap.parse_args()
 
     ensure_dirs()
+    if (Path(a.out) / "final" / "adapter_model.safetensors").exists() and not a.no_resume:
+        print(f"Adaptateur déjà entraîné : {a.out}/final -> on passe (--no_resume pour ré-entraîner)")
+        return
     torch.manual_seed(SEED)
     random.seed(SEED)
     tok = load_tokenizer(a.model)

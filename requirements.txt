@@ -2,7 +2,7 @@
 # En local avec une RTX 50xx (Blackwell), installer d'abord :
 #   pip install torch --index-url https://download.pytorch.org/whl/cu128
 torch>=2.7
-transformers>=4.56
+transformers>=5.24   # support de Qwen3.5 (architecture qwen3_5)
 peft>=0.17
 accelerate>=1.10
 bitsandbytes>=0.46

@@ -15,7 +15,7 @@ empruntés à la variante C (bruit d'entrée, injection de consignes simples).
 
 **Budget fixé au départ** : 4 h de GPU au plus (fourchette du sujet : 2 à 4 h) ; jeu de données réduit
 (≈ 1 000 tickets) ; graine 42. Le temps réellement consommé est calculé automatiquement dans
-`results/RESULTATS_test.md` (section « Budget GPU consommé »).
+`results/<modèle>/RESULTATS_test.md` (section « Budget GPU consommé »).
 
 ---
 
@@ -24,7 +24,8 @@ empruntés à la variante C (bruit d'entrée, injection de consignes simples).
 | Élément | Choix | Justification |
 |---|---|---|
 | Données | [ICDAR 2019 SROIE](https://rrc.cvc.uab.es/?ch=13), version dédoublonnée [`rth/sroie-2019-v2`](https://huggingface.co/datasets/rth/sroie-2019-v2) : 626 tickets train, 347 test | Vrais tickets (bruit OCR réel), annotation experte, **split test officiel** séparé, petit → compatible GPU gratuit |
-| Modèle | `Qwen/Qwen2.5-1.5B-Instruct` (non restreint) | Bon suivi d'instructions/JSON pour sa taille ; remplaçable via `--model` (SmolLM2-1.7B, Qwen3-1.7B, Gemma 4 E2B…) |
+| Modèle principal | `Qwen/Qwen3.5-2B` (mars 2026, Apache 2.0, non restreint) | Modèle récent, 2 B paramètres (haut de la fourchette du sujet), destiné au fine-tuning de tâches précises ; répond sans « réflexion » par défaut |
+| Modèle de comparaison | `Qwen/Qwen2.5-1.5B-Instruct` (fin 2024) | Même protocole sur un modèle plus ancien : le gain du fine-tuning se confirme-t-il d'une génération à l'autre ? Choix du modèle : variable `PROJET9_MODEL` |
 | Fine-tuning | QLoRA : base gelée 4 bits NF4 + double quantification, LoRA r=16, α=32, toutes les projections attention + MLP | ≈ 18 M paramètres entraînables (≈ 1 %), < 6 Go de VRAM |
 | Mini-RAG | Embeddings `BAAI/bge-small-en-v1.5`, récupération des k=2 tickets **du train** les plus proches, insérés comme exemples (few-shot dynamique) | Le RAG le plus naturel pour l'extraction : récupérer des exemples annotés similaires plutôt que des documents |
 | Métriques | Exact match par champ (normalisé), F1 tokens, ticket 100 % juste, taux de JSON valide, taux de valeurs **non ancrées** dans le ticket | L'extraction permet une évaluation objective, sans LLM-juge |
@@ -97,6 +98,13 @@ sur MTEB) ; remplaçable via `EMBED_MODEL` dans `src/config.py`.
 | Quasi-doublons du train (Jaccard ≥ 0,8) | – | – | 33 |
 | Vérité lisible dans l'OCR (test) | company 98,3 % · date 98,8 % · address 98,3 % · total 100 % | | |
 
+### Qwen3.5-2B : ce qui change techniquement
+
+- **Architecture hybride** : 18 couches sur 24 utilisent une attention linéaire (*Gated DeltaNet*), 6 une attention classique. LoRA cible donc aussi `in_proj_qkv`, `in_proj_z`, `out_proj` (détection automatique dans `train.py`).
+- **Vocabulaire de 248 k tokens** (embeddings de 508 M paramètres partagés avec la tête de sortie) : on ne remet pas ces embeddings en fp32 comme le fait `peft.prepare_model_for_kbit_training` (≈ 2 Go économisés, fonction `prepare_for_qlora`).
+- **Modèle multimodal** : on ne charge que la partie texte (`AutoModelForCausalLM` → `Qwen3_5ForCausalLM`, 0 poids manquant vérifié).
+- Sans les paquets `flash-linear-attention` / `causal-conv1d` (Linux), l'attention linéaire utilise une implémentation PyTorch de référence : correcte mais plus lente.
+
 ### Coût mesuré (RTX 5060 Laptop 8 Go, Qwen2.5-1.5B 4 bits)
 
 | Étape | VRAM pic | Durée |
@@ -122,7 +130,7 @@ Chaque couple (ticket, champ) est classé automatiquement (`src/metrics.py::clas
 
 ### Analyse critique : limites et risques éthiques (section obligatoire)
 
-À compléter avec les chiffres de `results/RESULTATS_test.md` ; les points ci-dessous sont le cadre.
+À compléter avec les chiffres de `results/<modèle>/RESULTATS_test.md` et `results/COMPARAISON_MODELES_test.md` ; les points ci-dessous sont le cadre.
 
 **Limites de l'étude**
 - **Un seul jeu de données, une seule graine** : tickets malaisiens en anglais (2017–2018). Les écarts de
@@ -155,7 +163,7 @@ Chaque couple (ticket, champ) est classé automatiquement (`src/metrics.py::clas
 - **Biais et équité** : modèle adapté à un format (Malaisie, anglais, grandes enseignes). Performances
   inconnues sur d'autres langues (arabe, français), d'autres formats ou des tickets de petits commerces
   mal imprimés : à évaluer avant tout déploiement.
-- **Licences** : SROIE est diffusé pour la recherche (compétition ICDAR) ; Qwen2.5-1.5B-Instruct est sous
+- **Licences** : SROIE est diffusé pour la recherche (compétition ICDAR) ; Qwen3.5-2B et Qwen2.5-1.5B-Instruct sont sous
   licence Apache 2.0. Usage pédagogique ici ; un usage commercial demande de vérifier les conditions.
 - **Coût environnemental** : quelques heures de GPU (budget ≤ 4 h, consommation réelle rapportée), modèle
   de 1,5 B et QLoRA (≈ 1 % des paramètres entraînés) : un choix frugal par rapport à un grand modèle via API.
@@ -218,15 +226,16 @@ src/
   infer.py       génération batchée pour chaque condition
   train.py       QLoRA (perte masquée sur le prompt, sélection sur la validation)
   metrics.py     normalisation, EM/F1, ancrage dans la source, typologie, McNemar, bootstrap
-  evaluate.py    agrégation -> results/RESULTATS_<split>.md + figures
+  evaluate.py    agrégation -> results/<modèle>/RESULTATS_<split>.md + figures
+  compare_models.py  comparaison entre modèles -> results/COMPARAISON_MODELES_<split>.md
   run_all.py     pipeline complet
   export_dataset.py  copie lisible du jeu de données -> dataset_sroie/ (images, CSV, aperçu HTML)
 dataset_sroie/   (généré) jeu de données à présenter : LISEZMOI.md, apercu.html, *.csv, images/
 notebooks/projet9_colab.ipynb   (Google Colab)
 notebooks/projet9_local.ipynb   (PyCharm / Jupyter en local)
 tests/test_metrics.py
-results/         (généré) prédictions, métriques, figures, tableau de résultats
-outputs/         (généré) adaptateurs LoRA
+results/<modèle>/  (généré) prédictions, métriques, figures, tableau de résultats — un dossier par modèle
+outputs/<modèle>/  (généré) adaptateurs LoRA et checkpoints — un dossier par modèle
 ```
 
 ## 5. Plan du rapport
