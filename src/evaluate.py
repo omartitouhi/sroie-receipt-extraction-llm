@@ -200,7 +200,7 @@ def budget_section(summaries):
         md.append(f"| inférence `{c}` ({m['n']} tickets) | {g.get('device', '–')} | "
                   f"{m['seconds'] / 60:.1f} | {g.get('max_allocated_gb', '–')} |")
     md.append(f"| **total** | | **{total:.0f} min ({total / 60:.1f} h)** | |")
-    md.append("\nBudget fixé au départ : **4 h de GPU** au plus (fourchette du sujet : 2 à 4 h).\n")
+    md.append("\nBudget fixé au départ : **4 h de GPU au plus par modèle de base**.\n")
     return md
 
 

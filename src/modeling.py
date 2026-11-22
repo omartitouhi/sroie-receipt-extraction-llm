@@ -6,7 +6,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 
 
 def limit_vram():
-    """Plafonne la VRAM utilisable par PyTorch (défaut 75 %, variable PROJET9_VRAM_FRACTION).
+    """Plafonne la VRAM utilisable par PyTorch (défaut 75 %, variable SROIE_LLM_VRAM_FRACTION).
 
     Sur un portable dont le GPU affiche aussi l'écran (Windows/WDDM), saturer la VRAM fait
     déborder le pilote en RAM partagée : le bureau peut geler au lieu d'un simple OOM.
@@ -14,7 +14,7 @@ def limit_vram():
     """
     import os
     if torch.cuda.is_available():
-        frac = float(os.environ.get("PROJET9_VRAM_FRACTION", "0.75"))
+        frac = float(os.environ.get("SROIE_LLM_VRAM_FRACTION", "0.75"))
         torch.cuda.set_per_process_memory_fraction(frac, 0)
         total = torch.cuda.get_device_properties(0).total_memory / 1e9
         print(f"[GPU] plafond VRAM PyTorch : {frac:.0%} de {total:.1f} Go")

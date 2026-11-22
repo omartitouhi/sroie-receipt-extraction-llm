@@ -16,9 +16,9 @@ FIELDS = ["company", "date", "address", "total"]
 
 # Modèles
 # Modèle principal : Qwen3.5-2B (mars 2026, Apache 2.0, 2 milliards de paramètres -> haut de la
-# fourchette 1-2 B du sujet). Modèle de comparaison : Qwen2.5-1.5B-Instruct (fin 2024).
-# Changer de modèle sans toucher au code : variable d'environnement PROJET9_MODEL.
-BASE_MODEL = os.environ.get("PROJET9_MODEL", "Qwen/Qwen3.5-2B")
+# fourchette 1-2 B visée). Modèle de comparaison : Qwen2.5-1.5B-Instruct (fin 2024).
+# Changer de modèle sans toucher au code : variable d'environnement SROIE_LLM_MODEL.
+BASE_MODEL = os.environ.get("SROIE_LLM_MODEL", "Qwen/Qwen3.5-2B")
 EMBED_MODEL = "BAAI/bge-small-en-v1.5"
 
 

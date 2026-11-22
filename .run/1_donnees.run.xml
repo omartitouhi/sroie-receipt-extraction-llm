@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="1 - Données" type="PythonConfigurationType" factoryName="Python" folderName="Projet 9">
+  <configuration default="false" name="1 - Données" type="PythonConfigurationType" factoryName="Python" folderName="Receipt extraction">
     <module name="Projet Machine Learning" />
     <option name="ENV_FILES" value="" />
     <option name="INTERPRETER_OPTIONS" value="" />
@@ -7,7 +7,7 @@
     <envs>
       <env name="PYTHONUNBUFFERED" value="1" />
       <env name="PYTHONIOENCODING" value="utf-8" />
-      <env name="PROJET9_VRAM_FRACTION" value="0.75" />
+      <env name="SROIE_LLM_VRAM_FRACTION" value="0.75" />
       <env name="HF_HUB_DISABLE_SYMLINKS_WARNING" value="1" />
     </envs>
     <option name="SDK_HOME" value="$USER_HOME$/venvs/projet9/Scripts/python.exe" />

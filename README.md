@@ -1,4 +1,4 @@
-# Projet 9 — Petit LLM, fine-tuning QLoRA et mini-RAG
+# Receipt information extraction with a small LLM (QLoRA + mini-RAG)
 
 Adapter un petit modèle de langage ouvert à une **tâche étroite d'extraction d'informations** :
 à partir du texte OCR d'un ticket de caisse scanné, produire un JSON
@@ -9,11 +9,10 @@ Adapter un petit modèle de langage ouvert à une **tâche étroite d'extraction
 1. Le fine-tuning QLoRA bat-il une baseline fondée uniquement sur le prompt, sur un jeu d'évaluation **jamais vu** ?
 2. Quelles hallucinations observe-t-on, et comment changent-elles avec le fine-tuning et le RAG ?
 
-**Positionnement dans le sujet** : Projet 9, **variante A** (« LoRA pour une sortie structurée :
-extraction d'informations en JSON »), complétée par un mini-RAG et par deux tests de robustesse
-empruntés à la variante C (bruit d'entrée, injection de consignes simples).
+**Périmètre** : fine-tuning LoRA pour une sortie structurée (extraction d'informations en JSON),
+complété par un mini-RAG et par deux tests de robustesse (bruit d'entrée, injection de consignes simples).
 
-**Budget fixé au départ** : 4 h de GPU au plus (fourchette du sujet : 2 à 4 h) ; jeu de données réduit
+**Budget fixé au départ** : 4 h de GPU au plus **par modèle de base**, soit ≈ 6 h pour la comparaison des deux modèles ; jeu de données réduit
 (≈ 1 000 tickets) ; graine 42. Le temps réellement consommé est calculé automatiquement dans
 `results/<modèle>/RESULTATS_test.md` (section « Budget GPU consommé »).
 
@@ -28,8 +27,8 @@ Hugging Face : [`titouhiomar/qwen2.5-1.5b-sroie-qlora`](https://huggingface.co/t
 | Élément | Choix | Justification |
 |---|---|---|
 | Données | [ICDAR 2019 SROIE](https://rrc.cvc.uab.es/?ch=13), version dédoublonnée [`rth/sroie-2019-v2`](https://huggingface.co/datasets/rth/sroie-2019-v2) : 626 tickets train, 347 test | Vrais tickets (bruit OCR réel), annotation experte, **split test officiel** séparé, petit → compatible GPU gratuit |
-| Modèle principal | `Qwen/Qwen3.5-2B` (mars 2026, Apache 2.0, non restreint) | Modèle récent, 2 B paramètres (haut de la fourchette du sujet), destiné au fine-tuning de tâches précises ; répond sans « réflexion » par défaut |
-| Modèle de comparaison | `Qwen/Qwen2.5-1.5B-Instruct` (fin 2024) | Même protocole sur un modèle plus ancien : le gain du fine-tuning se confirme-t-il d'une génération à l'autre ? Choix du modèle : variable `PROJET9_MODEL` |
+| Modèle principal | `Qwen/Qwen3.5-2B` (mars 2026, Apache 2.0, non restreint) | Modèle récent, 2 B paramètres (haut de la fourchette 1-2 B visée), destiné au fine-tuning de tâches précises ; répond sans « réflexion » par défaut |
+| Modèle de comparaison | `Qwen/Qwen2.5-1.5B-Instruct` (fin 2024) | Même protocole sur un modèle plus ancien : le gain du fine-tuning se confirme-t-il d'une génération à l'autre ? Choix du modèle : variable `SROIE_LLM_MODEL` |
 | Fine-tuning | QLoRA : base gelée 4 bits NF4 + double quantification, LoRA r=16, α=32, toutes les projections attention + MLP | ≈ 18 M paramètres entraînables (≈ 1 %), < 6 Go de VRAM |
 | Mini-RAG | Embeddings `BAAI/bge-small-en-v1.5`, récupération des k=2 tickets **du train** les plus proches, insérés comme exemples (few-shot dynamique) | Le RAG le plus naturel pour l'extraction : récupérer des exemples annotés similaires plutôt que des documents |
 | Métriques | Exact match par champ (normalisé), F1 tokens, ticket 100 % juste, taux de JSON valide, taux de valeurs **non ancrées** dans le ticket | L'extraction permet une évaluation objective, sans LLM-juge |
@@ -61,7 +60,7 @@ Comparaison statistique **appariée** (mêmes tickets) : bootstrap sur l'EM moye
 
 | Choix | Valeur | Pourquoi |
 |---|---|---|
-| Rang LoRA | r = 16, α = 32 | Valeur recommandée par le sujet ; α = 2r est la convention usuelle (échelle α/r = 2) |
+| Rang LoRA | r = 16, α = 32 | Valeur courante pour QLoRA ; α = 2r est la convention usuelle (échelle α/r = 2) |
 | Modules adaptés | q, k, v, o, gate, up, down | Adapter aussi le MLP améliore nettement QLoRA (Dettmers et al., 2023) pour ~1 % de paramètres |
 | Taux d'apprentissage | 2e-4, cosinus, 5 % de warmup | Valeur standard de QLoRA pour des modèles de 1 à 7 B |
 | Batch effectif | 16 (1 × accumulation 16) | Batch 4 dépasse la VRAM à cause des logits (vocabulaire de 152 k tokens) |
@@ -72,11 +71,11 @@ Comparaison statistique **appariée** (mêmes tickets) : bootstrap sur l'EM moye
 Aucun hyperparamètre n'a été réglé sur le test.
 
 ### Pourquoi un RAG d'exemples, sans découpage en passages
-L'annexe du sujet décrit un RAG « documents → découpage → passages proches ». Ici, l'unité naturelle est
+Un RAG classique suit le schéma « documents → découpage → passages proches ». Ici, l'unité naturelle est
 **le ticket entier avec son JSON annoté** : un ticket fait ≈ 700 caractères (≈ 250 tokens), il tient
 largement dans le contexte, et le découper séparerait l'exemple de sa réponse. Le RAG récupère donc les
 k = 2 tickets annotés du train les plus proches (few-shot dynamique). Modèle d'embeddings :
-`bge-small-en-v1.5` (33 M paramètres, même catégorie que `all-MiniLM-L6-v2` du sujet, meilleur en recherche
+`bge-small-en-v1.5` (33 M paramètres, même catégorie que `all-MiniLM-L6-v2`, meilleur en recherche
 sur MTEB) ; remplaçable via `EMBED_MODEL` dans `src/config.py`.
 
 ### Pièges et parades
@@ -118,7 +117,7 @@ sur MTEB) ; remplaçable via `EMBED_MODEL` dans `src/config.py`.
 
 **Piège mémoire rencontré** : avec batch 4, le pic atteint 11,5 Go (les logits sur un vocabulaire de 152 k tokens pèsent à eux seuls ~3 Go en fp32). Sous Windows le pilote déborde alors en RAM partagée et l'entraînement devient ~10× plus lent sans planter. Batch 1 + accumulation de gradient donne le même batch effectif dans 4,6 Go.
 
-**Gel du PC en local** : même en batch 1, un run a fait geler Windows (le GPU du portable affiche aussi l'écran, la VRAM était à 7,7 / 8,1 Go). Le code plafonne désormais PyTorch à 75 % de la VRAM (`PROJET9_VRAM_FRACTION`), ce qui donne une erreur « out of memory » propre au lieu d'un gel. Pour l'entraînement complet, **Colab (T4 16 Go, aucun écran branché dessus) est l'option la plus sûre** ; en local, fermez les applications gourmandes en GPU et branchez le secteur. Option conseillée côté Windows : Panneau de configuration NVIDIA → *CUDA – Sysmem Fallback Policy* → *Prefer No Sysmem Fallback*.
+**Gel du PC en local** : même en batch 1, un run a fait geler Windows (le GPU du portable affiche aussi l'écran, la VRAM était à 7,7 / 8,1 Go). Le code plafonne désormais PyTorch à 75 % de la VRAM (`SROIE_LLM_VRAM_FRACTION`), ce qui donne une erreur « out of memory » propre au lieu d'un gel. Pour l'entraînement complet, **Colab (T4 16 Go, aucun écran branché dessus) est l'option la plus sûre** ; en local, fermez les applications gourmandes en GPU et branchez le secteur. Option conseillée côté Windows : Panneau de configuration NVIDIA → *CUDA – Sysmem Fallback Policy* → *Prefer No Sysmem Fallback*.
 
 ### Typologie des erreurs (analyse des hallucinations)
 
@@ -176,9 +175,9 @@ Chaque couple (ticket, champ) est classé automatiquement (`src/metrics.py::clas
 
 ### Option A — Google Colab (GPU T4 gratuit)
 
-1. Déposer `projet9_colab.zip` (29 Ko : code + notebook) à la racine de Google Drive (`MyDrive/`).
-2. Ouvrir `notebooks/projet9_colab.ipynb` dans Colab (Fichier → Importer le notebook), runtime **GPU T4**.
-3. Exécuter les cellules dans l'ordre : la première décompresse le projet dans `MyDrive/projet9`.
+1. Déposer `sroie-llm_colab.zip` (29 Ko : code + notebook) à la racine de Google Drive (`MyDrive/`).
+2. Ouvrir `notebooks/colab.ipynb` dans Colab (Fichier → Importer le notebook), runtime **GPU T4**.
+3. Exécuter les cellules dans l'ordre : la première décompresse le projet dans `MyDrive/sroie-llm`.
 4. Si la session coupe : relancer les cellules dans l'ordre. Les conditions déjà calculées sont sautées et l'entraînement reprend au dernier checkpoint.
 
 Pour reconstruire le zip après une modification du code : `src/`, `tests/`, `notebooks/`, `README.md`, `requirements.txt`.
@@ -186,24 +185,24 @@ Pour reconstruire le zip après une modification du code : `src/`, `tests/`, `no
 ### Option B — En local (testé sous Windows 11, RTX 5060 Laptop 8 Go)
 
 ```bash
-python -m venv C:/Users/<vous>/venvs/projet9
+python -m venv C:/Users/<vous>/venvs/sroie-llm
 ```
 (Le venv est volontairement **hors de OneDrive** pour éviter de synchroniser des Go de bibliothèques.)
 
 ```bash
-C:/Users/<vous>/venvs/projet9/Scripts/pip install torch --index-url https://download.pytorch.org/whl/cu128
+C:/Users/<vous>/venvs/sroie-llm/Scripts/pip install torch --index-url https://download.pytorch.org/whl/cu128
 ```
 
 ```bash
-C:/Users/<vous>/venvs/projet9/Scripts/pip install -r requirements.txt
+C:/Users/<vous>/venvs/sroie-llm/Scripts/pip install -r requirements.txt
 ```
 
 ```bash
-C:/Users/<vous>/venvs/projet9/Scripts/python -m src.run_all --quick
+C:/Users/<vous>/venvs/sroie-llm/Scripts/python -m src.run_all --quick
 ```
 
 ```bash
-C:/Users/<vous>/venvs/projet9/Scripts/python -m src.run_all
+C:/Users/<vous>/venvs/sroie-llm/Scripts/python -m src.run_all
 ```
 
 Étapes individuelles :
@@ -235,8 +234,8 @@ src/
   run_all.py     pipeline complet
   export_dataset.py  copie lisible du jeu de données -> dataset_sroie/ (images, CSV, aperçu HTML)
 dataset_sroie/   (généré) jeu de données à présenter : LISEZMOI.md, apercu.html, *.csv, images/
-notebooks/projet9_colab.ipynb   (Google Colab)
-notebooks/projet9_local.ipynb   (PyCharm / Jupyter en local)
+notebooks/colab.ipynb   (Google Colab)
+notebooks/local.ipynb   (PyCharm / Jupyter en local)
 tests/test_metrics.py
 results/<modèle>/  (généré) prédictions, métriques, figures, tableau de résultats — un dossier par modèle
 outputs/<modèle>/  (généré) adaptateurs LoRA et checkpoints — un dossier par modèle
