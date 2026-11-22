@@ -17,6 +17,10 @@ empruntés à la variante C (bruit d'entrée, injection de consignes simples).
 (≈ 1 000 tickets) ; graine 42. Le temps réellement consommé est calculé automatiquement dans
 `results/<modèle>/RESULTATS_test.md` (section « Budget GPU consommé »).
 
+**Adaptateur publié** : le modèle fine-tuné (Qwen2.5-1.5B-Instruct + QLoRA) est disponible sur
+Hugging Face : [`titouhiomar/qwen2.5-1.5b-sroie-qlora`](https://huggingface.co/titouhiomar/qwen2.5-1.5b-sroie-qlora)
+(fiche du modèle avec exemple d'utilisation). Les poids ne sont pas versionnés dans ce dépôt.
+
 ---
 
 ## 1. Choix techniques
